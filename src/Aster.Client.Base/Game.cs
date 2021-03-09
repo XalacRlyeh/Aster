@@ -39,7 +39,7 @@ namespace Aster.Client.Base
                 Window.Size = windowSize;
             }
 
-            Camera = new Camera(CameraMode.Perspective, new Vector3(0, 0, 128), Window.Size.X / (float)Window.Size.Y);
+            Camera = new Camera(CameraMode.Orthogonal, new Vector3(0, 0, 256), Window.Size.X / (float)Window.Size.Y);
         }
 
         protected ILogger Logger { get; }

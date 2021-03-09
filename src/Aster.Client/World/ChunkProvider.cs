@@ -39,7 +39,7 @@ namespace Aster.Client.World
                 return chunk;
             }
 
-            var chunkFilePath = Path.Combine(_chunkProviderOptions.StoragePath, planetId.ToString("N"), $"{position.Y}-{position.X}.chunk");
+            var chunkFilePath = Path.Combine(_chunkProviderOptions.StoragePath, planetId.ToString("N"), $"{position.X}-{position.Y}.chunk");
             if (TryLoadChunk(position, chunkFilePath, out chunk))
             {
                 return chunk;

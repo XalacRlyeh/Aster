@@ -18,7 +18,7 @@ namespace Aster.Client
 
         public Mesh CreateChunkMesh(IReadOnlyCollection<Chunk> visibleChunks)
         {
-            var tileSize = 1;
+            const int tileSize = Tile.TileSize;
             var vertices = new List<VertexPositionColorTexture>();
             foreach (var visibleChunk in visibleChunks)
             {
@@ -32,8 +32,8 @@ namespace Aster.Client
                     var tileX = i % Chunk.ChunkSize;
                     var tileY = i / Chunk.ChunkSize;
 
-                    var tX = chunkPosition.X * Chunk.ChunkSize + tileX;
-                    var tY = chunkPosition.Y * Chunk.ChunkSize + tileY;
+                    var tX = chunkPosition.X * Chunk.ChunkSize * Tile.TileSize + (tileX * Tile.TileSize);
+                    var tY = chunkPosition.Y * Chunk.ChunkSize * Tile.TileSize + (tileY * Tile.TileSize);
 
                     var color = tileX == Chunk.ChunkSize - 1 || tileY == Chunk.ChunkSize - 1
                         ? new Vector4(1.0f, 0.0f, 0.0f, 1.0f)

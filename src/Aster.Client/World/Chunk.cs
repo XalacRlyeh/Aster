@@ -5,8 +5,9 @@ namespace Aster.Client.World
 {
     public class Chunk
     {
-        public const int ChunkSize = 64;
+        public const int ChunkSize = 32;
         public const int ChunkSizeSquared = ChunkSize * ChunkSize;
+        public const int ChunkSizeHalved = ChunkSize / 2;
 
         public Chunk(Guid planetId, Vector2i position, Tile[] tiles)
         {

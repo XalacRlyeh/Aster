@@ -2,7 +2,7 @@
 {
     public struct Tile
     {
-        public const int TileSize = 32;
+        public const int TileSize = 8;
 
         public int Id { get; set; }
     }

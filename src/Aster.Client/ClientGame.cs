@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Drawing.Drawing2D;
 using System.Runtime.InteropServices;
+using System.Text;
 using Aster.Client.Base;
 using Aster.Client.Extensions;
 using Aster.Client.World;
@@ -12,6 +11,7 @@ using OpenTK.Mathematics;
 using OpenTK.Windowing.Common;
 using OpenTK.Windowing.GraphicsLibraryFramework;
 using Serilog;
+using Num = System.Numerics;
 
 namespace Aster.Client
 {
@@ -44,6 +44,10 @@ namespace Aster.Client
         private ConstantBuffer _cubeMeshMatrixBuffer;
         private InputBuffer _chunkMeshMvp;
         private InputBuffer _cubeMeshMvp;
+
+        private Num.Vector3 _cameraPosition;
+        private Num.Vector3 _cameraPositionRaw;
+        private Num.Vector2 _chunkPosition;
 
         public ClientGame(
             ILogger logger,
@@ -97,12 +101,9 @@ namespace Aster.Client
             GL.FrontFace(FrontFaceDirection.Ccw);
 
             GL.Enable(EnableCap.DepthTest);
-            GL.DepthFunc(DepthFunction.Less);
+            GL.DepthFunc(DepthFunction.Lequal);
 
-            GL.Enable(EnableCap.Texture2D);
             GL.Enable(EnableCap.Blend);
-
-            //GL.Viewport(0, 0, Window.Size.X, 1 - Window.Size.Y);
         }
 
         private float angle = 0.0f;
@@ -113,7 +114,7 @@ namespace Aster.Client
             GL.ClearColor(_clearColor);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
-            _chunkMeshMvp.ModelViewProjectionMatrix = Matrix4.CreateScale(1, -1, 1) *
+            _chunkMeshMvp.ModelViewProjectionMatrix = Matrix4.CreateScale(1, 1, 1) *
                                                       Camera.GetViewMatrix() *
                                                       Camera.GetProjectionMatrix(Window.Size.X, Window.Size.Y);
             _cubeMeshMvp.ModelViewProjectionMatrix = Matrix4.CreateTranslation(Camera.Position) *
@@ -136,6 +137,18 @@ namespace Aster.Client
 
             if (ImGui.Begin("TestWindow"))
             {
+                if (ImGui.InputFloat3("Camera Raw", ref _cameraPositionRaw))
+                {
+                }
+
+                if (ImGui.InputFloat3("Camera", ref _cameraPosition))
+                {
+                }
+
+                if (ImGui.InputFloat2("Chunk Position", ref _chunkPosition))
+                {
+                }
+
                 if (ImGui.Button("Close"))
                 {
                     Window.Close();
@@ -182,7 +195,24 @@ namespace Aster.Client
 
             Camera.Position += direction * 0.1f;
 
-            var chunkPosition = new Vector2i((int)(Camera.Position.X / Chunk.ChunkSize), (int)(Camera.Position.Y / Chunk.ChunkSize));
+            Vector2i ChunkPositionFromCameraPosition(Vector3 cameraPosition)
+            {
+                var cx = (int)(cameraPosition.X / Chunk.ChunkSize / Tile.TileSize);
+                var cy = (int)(cameraPosition.Y / Chunk.ChunkSize / Tile.TileSize);
+                if (cameraPosition.X < 0)
+                {
+                    cx--;
+                }
+
+                if (cameraPosition.Y < 0)
+                {
+                    cy--;
+                }
+
+                return new Vector2i(cx, cy);
+            }
+
+            var chunkPosition = ChunkPositionFromCameraPosition(Camera.Position);
             var visibleChunks = CalculateVisibleChunks(chunkPosition);
             var visibleChunksHashCode = visibleChunks.GetSequenceHashCode();
             if (_visibleChunksHashCode != visibleChunksHashCode)
@@ -191,19 +221,21 @@ namespace Aster.Client
                 _visibleChunksHashCode = visibleChunksHashCode;
             }
 
-            Window.Title = $"{chunkPosition.ToString()} {visibleChunksHashCode}";
+            _chunkPosition = new Num.Vector2(chunkPosition.X, chunkPosition.Y);
+            _cameraPositionRaw = new Num.Vector3(Camera.Position.X, Camera.Position.Y, Camera.Position.Z);
+            _cameraPosition = new Num.Vector3(Camera.Position.X, Camera.Position.Y, 0.0f);
 
             base.Update(e);
         }
 
         private IReadOnlyCollection<Chunk> CalculateVisibleChunks(Vector2i chunkPosition)
         {
-            var radius = 1;
+            var radius = 2;
             var visibleChunks = new List<Chunk>();
 
-            for (var y = chunkPosition.Y - radius; y <= chunkPosition.Y + 2 * radius; ++y)
+            for (var y = chunkPosition.Y - radius; y <= chunkPosition.Y + radius; ++y)
             {
-                for (var x = chunkPosition.X - radius; x <= chunkPosition.X + 2 * radius; ++x)
+                for (var x = chunkPosition.X - radius; x <= chunkPosition.X + radius; ++x)
                 {
                     visibleChunks.Add(_chunkProvider.GetChunk(Guid.Empty, chunkPosition + new Vector2i(x, y)));
                 }

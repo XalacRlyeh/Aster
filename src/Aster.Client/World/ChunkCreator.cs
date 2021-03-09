@@ -84,27 +84,27 @@ namespace Aster.Client.World
 
         private Tile NoiseToTileId(float noiseValue)
         {
-            if (noiseValue < 0.1f)
+            if (noiseValue < 0.2f)
             {
                 return RandomDeepWaterTile();
             }
 
-            if (noiseValue >= 0.1f && noiseValue < 0.15f)
+            if (noiseValue >= 0.2f && noiseValue < 0.22f)
             {
                 return RandomShallowWaterTile();
             }
 
-            if (noiseValue >= 0.15f && noiseValue < 0.18f)
+            if (noiseValue >= 0.22f && noiseValue < 0.25f)
             {
                 return RandomCoastWaterTile();
             }
 
-            if (noiseValue >= 0.18f && noiseValue < 0.25f)
+            if (noiseValue >= 0.25f && noiseValue < 0.3f)
             {
                 return RandomSandTile();
             }
 
-            if (noiseValue >= 0.25f && noiseValue < 0.65f)
+            if (noiseValue >= 0.3f && noiseValue < 0.7f)
             {
                 return RandomGrassTile();
             }
